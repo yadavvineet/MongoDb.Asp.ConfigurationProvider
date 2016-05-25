@@ -1,0 +1,19 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "MongoDb.Asp.ConfigurationProvider Class Library",
+  "authors": [ "vineetyadav" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "MongoDB.Driver": "2.2.4"
+      }
+    }
+  },
+  "dependencies": {
+    "Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-final"
+  }
+}
