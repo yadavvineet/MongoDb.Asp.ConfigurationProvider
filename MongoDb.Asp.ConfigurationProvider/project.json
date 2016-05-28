@@ -1,6 +1,6 @@
 ﻿{
-  "version": "1.0.0-*",
-  "description": "MongoDb.Asp.ConfigurationProvider Class Library",
+  "version": "1.0.0.3",
+  "description": "MongoDb.Asp.ConfigurationProvider to load asp5 Configuration from MongoDb",
   "authors": [ "vineetyadav" ],
   "tags": [ "" ],
   "projectUrl": "",
