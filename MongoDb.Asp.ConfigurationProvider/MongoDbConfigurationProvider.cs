@@ -8,19 +8,58 @@ using System.Linq;
 
 namespace MongoDb.Asp.ConfigurationProvider
 {
+    /// <summary>
+    /// Class MongoDbConfigurationProvider.
+    /// Implements the <see cref="IConfigurationProvider" />
+    /// </summary>
+    /// <seealso cref="IConfigurationProvider" />
     public class MongoDbConfigurationProvider : IConfigurationProvider
     {
+        /// <summary>
+        /// The connection string
+        /// </summary>
         private readonly string _connectionString;
+        /// <summary>
+        /// The database
+        /// </summary>
         private readonly string _database;
+        /// <summary>
+        /// The collection to use
+        /// </summary>
         private readonly string _collectionToUse;
+        /// <summary>
+        /// The read mode
+        /// </summary>
         private readonly ConfigReadOption _readMode;
+        /// <summary>
+        /// The items collection
+        /// </summary>
         private readonly Dictionary<string, string> _itemsCollection;
+        /// <summary>
+        /// The keys to read
+        /// </summary>
         private readonly string[] _keysToRead;
+        /// <summary>
+        /// The run in query mode
+        /// </summary>
         private readonly bool _runInQueryMode;
+        /// <summary>
+        /// The key to match
+        /// </summary>
         private readonly string _keyToMatch;
+        /// <summary>
+        /// The value to match
+        /// </summary>
         private readonly object _valueToMatch;
+        /// <summary>
+        /// The token
+        /// </summary>
         private readonly ConfigurationReloadToken _token;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDbConfigurationProvider"/> class.
+        /// </summary>
+        /// <param name="options">The options.</param>
         public MongoDbConfigurationProvider(MongoDbConfigOptions options)
         {
             _connectionString = options.ConnectionString;
@@ -38,10 +77,9 @@ namespace MongoDb.Asp.ConfigurationProvider
         /// <summary>
         /// Tries to get a configuration value for the specified key.
         /// </summary>
-        /// <param name="key">The key.</param><param name="value">The value.</param>
-        /// <returns>
-        /// <c>True</c> if a value for the specified key was found, otherwise <c>false</c>.
-        /// </returns>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <returns><c>True</c> if a value for the specified key was found, otherwise <c>false</c>.</returns>
         public bool TryGet(string key, out string value)
         {
             if (_itemsCollection.ContainsKey(key))
@@ -56,19 +94,25 @@ namespace MongoDb.Asp.ConfigurationProvider
         /// <summary>
         /// Sets a configuration value for the specified key.
         /// </summary>
-        /// <param name="key">The key.</param><param name="value">The value.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <exception cref="NotSupportedException">Setting a key is not supported.</exception>
         public void Set(string key, string value)
         {
             throw new NotSupportedException("Setting a key is not supported.");
         }
 
+        /// <summary>
+        /// Returns a change token if this provider supports change tracking, null otherwise.
+        /// </summary>
+        /// <returns>The change token.</returns>
         public IChangeToken GetReloadToken()
         {
             return _token;
         }
 
         /// <summary>
-        /// Loads configuration values from the source represented by this <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider"/>.
+        /// Loads configuration values from the source represented by this <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider" />.
         /// </summary>
         public void Load()
         {
@@ -120,12 +164,25 @@ namespace MongoDb.Asp.ConfigurationProvider
             }
         }
 
+        /// <summary>
+        /// Gets the string value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>System.String.</returns>
         private string GetStringValue(BsonValue value)
         {
             var doc = value as BsonDocument;
             return doc != null ? doc.ToJson() : value.ToString();
         }
 
+        /// <summary>
+        /// Returns the immediate descendant configuration keys for a given parent path based on this
+        /// <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider" />s data and the set of keys returned by all the preceding
+        /// <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider" />s.
+        /// </summary>
+        /// <param name="earlierKeys">The child keys returned by the preceding providers for the same parent path.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <returns>The child keys.</returns>
         public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
         {
             return earlierKeys;
