@@ -1,29 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MongoDb.Asp.ConfigurationProvider
 {
     public class MongoDbConfigurationProvider : IConfigurationProvider
     {
-        private readonly string _databaseConnection;
+        private readonly string _connectionString;
         private readonly string _database;
         private readonly string _collectionToUse;
-        private readonly string _columnKey;
-        private readonly string _columnValue;
-        Dictionary<string, string> itemsCollection;
+        private readonly ConfigReadOption _readMode;
+        private readonly Dictionary<string, string> _itemsCollection;
+        private readonly string[] _keysToRead;
+        private readonly bool _runInQueryMode;
+        private readonly string _keyToMatch;
+        private readonly object _valueToMatch;
 
-        public MongoDbConfigurationProvider(string databaseConnection, string database, 
-            string collectionToUse, string columnKey, string columnValue)
+        public MongoDbConfigurationProvider(MongoDbConfigOptions options)
         {
-            _databaseConnection = databaseConnection;
-            _database = database;
-            _collectionToUse = collectionToUse;
-            _columnKey = columnKey;
-            _columnValue = columnValue;
+            _connectionString = options.ConnectionString;
+            _database = options.DatabaseName;
+            _collectionToUse = options.CollectionName;
+            _readMode = options.ReadOption;
+            _keysToRead = options.KeysToRead;
+            _itemsCollection = new Dictionary<string, string>();
+            _runInQueryMode = options.QueryInFilteredMode;
+            _keyToMatch = options.KeyToQuery;
+            _valueToMatch = options.ValueToMatch;
         }
 
         /// <summary>
@@ -35,9 +42,9 @@ namespace MongoDb.Asp.ConfigurationProvider
         /// </returns>
         public bool TryGet(string key, out string value)
         {
-            if (itemsCollection.ContainsKey(key))
+            if (_itemsCollection.ContainsKey(key))
             {
-                value =  itemsCollection[key];
+                value = _itemsCollection[key];
                 return true;
             }
             value = string.Empty;
@@ -53,44 +60,73 @@ namespace MongoDb.Asp.ConfigurationProvider
             throw new NotSupportedException("Setting a key is not supported.");
         }
 
+        public IChangeToken GetReloadToken()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Loads configuration values from the source represented by this <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider"/>.
         /// </summary>
         public void Load()
         {
-            var mongoClient = new MongoClient(_databaseConnection);
+            var mongoClient = new MongoClient(_connectionString);
             var mongoServer = mongoClient.GetDatabase(_database);
             var collection = mongoServer.GetCollection<BsonDocument>(_collectionToUse);
-            var configItemList = collection.Find(new BsonDocument()).ToList();
-            itemsCollection = new Dictionary<string, string>();
-            foreach (var item in configItemList)
+            var configItemList = _runInQueryMode
+                ? collection.Find(Builders<BsonDocument>.Filter.Eq(_keyToMatch, _valueToMatch)).ToList()
+                : collection.Find(new BsonDocument()).ToList();
+            _itemsCollection.Clear();
+            if (_readMode == ConfigReadOption.ReadAll)
             {
-                if (item.Names.Contains(_columnKey))
+                foreach (var document in configItemList)
                 {
-                    if (item.Names.Contains(_columnValue))
-                        itemsCollection.Add(item[_columnKey].ToString(), item[_columnValue].ToString());
-                    else
+                    foreach (var item in document.Names)
                     {
-                        itemsCollection.Add(item[_columnKey].ToString(), null);
+                        if (item.Equals("_id", StringComparison.InvariantCultureIgnoreCase)) continue;
+
+                        if (_itemsCollection.ContainsKey(item))
+                        {
+                            _itemsCollection[item] = GetStringValue(document.GetValue(item));
+                        }
+                        else
+                        {
+                            _itemsCollection.Add(item, GetStringValue(document.GetValue(item)));
+                        }
+                    }
+                }
+            }
+            else if (_readMode == ConfigReadOption.ReadAll && _keysToRead.Length > 0)
+            {
+                foreach (var document in configItemList)
+                {
+                    foreach (var item in document.Names)
+                    {
+                        if (_keysToRead.Any(b => b.Equals(item, StringComparison.InvariantCultureIgnoreCase)))
+                        {
+                            if (_itemsCollection.ContainsKey(item))
+                            {
+                                _itemsCollection[item] = GetStringValue(document.GetValue(item));
+                            }
+                            else
+                            {
+                                _itemsCollection.Add(item, GetStringValue(document.GetValue(item)));
+                            }
+                        }
                     }
                 }
             }
         }
 
-      
-
-        /// <summary>
-        /// Returns the immediate descendant configuration keys for a given parent path based on this
-        ///             <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider"/>'s data and the set of keys returned by all the preceding
-        ///             <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider"/>s.
-        /// </summary>
-        /// <param name="earlierKeys">The child keys returned by the preceding providers for the same parent path.</param><param name="parentPath">The parent path.</param><param name="delimiter">The delimiter to use to identify keys in the <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider"/>'s data.</param>
-        /// <returns>
-        /// The child keys.
-        /// </returns>
-        public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath, string delimiter)
+        private string GetStringValue(BsonValue value)
         {
-            throw new NotSupportedException();
+            var doc = value as BsonDocument;
+            return doc != null ? doc.ToJson() : value.ToString();
+        }
+
+        public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
+        {
+            throw new NotImplementedException();
         }
     }
 }
