@@ -19,6 +19,7 @@ namespace MongoDb.Asp.ConfigurationProvider
         private readonly bool _runInQueryMode;
         private readonly string _keyToMatch;
         private readonly object _valueToMatch;
+        private readonly ConfigurationReloadToken _token;
 
         public MongoDbConfigurationProvider(MongoDbConfigOptions options)
         {
@@ -31,6 +32,7 @@ namespace MongoDb.Asp.ConfigurationProvider
             _runInQueryMode = options.QueryInFilteredMode;
             _keyToMatch = options.KeyToQuery;
             _valueToMatch = options.ValueToMatch;
+            _token = new ConfigurationReloadToken();
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace MongoDb.Asp.ConfigurationProvider
 
         public IChangeToken GetReloadToken()
         {
-            throw new NotImplementedException();
+            return _token;
         }
 
         /// <summary>
@@ -96,7 +98,7 @@ namespace MongoDb.Asp.ConfigurationProvider
                     }
                 }
             }
-            else if (_readMode == ConfigReadOption.ReadAll && _keysToRead.Length > 0)
+            else if (_readMode == ConfigReadOption.DefinedKeys && _keysToRead.Length > 0)
             {
                 foreach (var document in configItemList)
                 {
@@ -126,7 +128,7 @@ namespace MongoDb.Asp.ConfigurationProvider
 
         public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string parentPath)
         {
-            throw new NotImplementedException();
+            return earlierKeys;
         }
     }
 }

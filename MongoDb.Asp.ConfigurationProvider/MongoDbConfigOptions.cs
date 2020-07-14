@@ -32,7 +32,7 @@
         {
             return new MongoDbConfigOptions(connectionString, databaseName, collectionName);
         }
-        public static MongoDbConfigOptions GetOptionsForDefinedKeysAllDocuments(string connectionString, string databaseName, string collectionName, string[] keysToRead)
+        public static MongoDbConfigOptions GetOptionsForDefinedKeysAllDocuments(string connectionString, string databaseName, string collectionName, params string[] keysToRead)
         {
             return new MongoDbConfigOptions(connectionString, databaseName, collectionName, keysToRead);
         }
@@ -48,7 +48,7 @@
             return instance;
         }
         public static MongoDbConfigOptions GetOptionsForDefinedKeysFilteredDocument(string connectionString, string databaseName,
-            string collectionName, string[] keysToRead, string keyToQuery, object valueToMatch)
+            string collectionName, string keyToQuery, object valueToMatch, params string[] keysToRead)
         {
             var instance = new MongoDbConfigOptions(connectionString, databaseName, collectionName, keysToRead)
             {
