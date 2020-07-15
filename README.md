@@ -84,18 +84,18 @@ Following four methods are provided currently to load different configurations. 
        private static void ConfigureMongoConfiguration(HostBuilderContext arg1, IConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForAllKeysAllDocuments(
-                @"mongodb://<CONNECTION_STRING>",
-                "myconfigdb", "settings"));
-       configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysAllDocuments(
-           @"mongodb://<CONNECTION_STRING>",
-           "myconfigdb", "settings","key2","key3"));
+               @"mongodb://<CONNECTION_STRING>",
+               "myconfigdb", "settings"));
+            configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysAllDocuments(
+               @"mongodb://<CONNECTION_STRING>",
+               "myconfigdb", "settings","key2","key3"));
 
-        configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForAllKeysFilteredDocuments(
-            @"mongodb://<CONNECTION_STRING>",
-            "myconfigdb", "settings", "environment", "qa"));
+            configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForAllKeysFilteredDocuments(
+               @"mongodb://<CONNECTION_STRING>",
+               "myconfigdb", "settings", "environment", "qa"));
         
-        configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysFilteredDocument(
-            @"mongodb://<CONNECTION_STRING>",
-            "myconfigdb", "settings", "environment", "dev", "key1", "key2", "key9"));
+            configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysFilteredDocument(
+               @"mongodb://<CONNECTION_STRING>",
+               "myconfigdb", "settings", "environment", "dev", "key1", "key2", "key9"));
     }
 ```
