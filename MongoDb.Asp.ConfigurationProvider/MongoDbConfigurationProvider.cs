@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MongoDb.Asp.ConfigurationProvider
 {
@@ -57,6 +59,8 @@ namespace MongoDb.Asp.ConfigurationProvider
         /// The token
         /// </summary>
         private readonly ConfigurationReloadToken _token;
+
+        private Task _configurationListeningTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbConfigurationProvider"/> class.
@@ -145,7 +149,9 @@ namespace MongoDb.Asp.ConfigurationProvider
             {
                 _itemsCollection.Add(item.Key, item.Value);
             }
+            
         }
+        
         /// <summary>
         /// Loads configuration values from the source represented by this <see cref="T:Microsoft.Extensions.Configuration.IConfigurationProvider" />.
         /// </summary>
@@ -171,6 +177,28 @@ namespace MongoDb.Asp.ConfigurationProvider
                 {
                     AddDocumentToDictionary(document);
                 }
+            }
+            
+            _configurationListeningTask = new Task(WatchChanges);
+            _configurationListeningTask.Start();
+        }
+
+        private async void WatchChanges()
+        {
+            var mongoClient = new MongoClient(_connectionString);
+            var mongoServer = mongoClient.GetDatabase(_database);
+            var collection = mongoServer.GetCollection<BsonDocument>(_collectionToUse);
+
+            using (var cursor = await collection.WatchAsync())
+            {
+                Console.WriteLine("Watch started");
+                while (await cursor.MoveNextAsync() && !cursor.Current.Any())
+                {
+                }
+                
+                Console.WriteLine("Change found, reloading");
+                Load();
+                _token.OnReload();
             }
         }
 

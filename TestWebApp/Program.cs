@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -22,9 +23,10 @@ namespace TestWebApp
 
         private static void ConfigureMongoConfiguration(HostBuilderContext arg1, IConfigurationBuilder configurationBuilder)
         {
+            var url = Environment.GetEnvironmentVariable("MONGO_URL");
             configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForAllKeysAllDocuments(
-                @"mongodb://<CONNECTION_STRING>",
-                "myconfigdb", "settings"));
+                url,
+                "server", "settings"));
 
             //configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysAllDocuments(
             //    @"mongodb://<CONNECTION_STRING>",
@@ -33,9 +35,9 @@ namespace TestWebApp
             //configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForAllKeysFilteredDocuments(
             //    @"mongodb://<CONNECTION_STRING>",
             //    "myconfigdb", "settings", "environment", "qa"));
-            configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysFilteredDocument(
-                @"mongodb://<CONNECTION_STRING>",
-                "myconfigdb", "settings", "environment", "dev", "key1", "key2", "key9"));
+            //configurationBuilder.AddMongoDbConfiguration(MongoDbConfigOptions.GetOptionsForDefinedKeysFilteredDocument(
+            //    @"mongodb://<CONNECTION_STRING>",
+            //    "myconfigdb", "settings", "environment", "dev", "key1", "key2", "key9"));
         }
     }
 }
