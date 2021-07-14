@@ -2,14 +2,16 @@
 {
     public sealed class MongoDbConfigOptions
     {
-        internal string ConnectionString { get; }
-        internal string DatabaseName { get; }
-        internal string CollectionName { get; }
-        internal string[] KeysToRead { get; }
-        internal ConfigReadOption ReadOption { get; }
-        internal bool QueryInFilteredMode { get; set; }
-        internal string KeyToQuery { get; set; }
-        internal object ValueToMatch { get; set; }
+        public string ConnectionString { get; set; }
+        public string DatabaseName { get; set; }
+        public string CollectionName { get; set; }
+        public string[] KeysToRead { get; set; }
+        public ConfigReadOption ReadOption { get; set; }
+        public bool QueryInFilteredMode { get; set; }
+        public string KeyToQuery { get; set; }
+        public object ValueToMatch { get; set; }
+
+        public bool LiveReload { get; set; }
 
         private MongoDbConfigOptions(string connectionString, string databaseName, string collectionName)
         {

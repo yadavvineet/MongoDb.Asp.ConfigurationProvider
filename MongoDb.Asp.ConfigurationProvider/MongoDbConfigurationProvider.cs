@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace MongoDb.Asp.ConfigurationProvider
 {
@@ -59,6 +60,8 @@ namespace MongoDb.Asp.ConfigurationProvider
         /// The token
         /// </summary>
         private readonly ConfigurationReloadToken _token;
+
+        private readonly ILogger _logger;
 
         private Task _configurationListeningTask;
 
@@ -189,17 +192,24 @@ namespace MongoDb.Asp.ConfigurationProvider
             var mongoServer = mongoClient.GetDatabase(_database);
             var collection = mongoServer.GetCollection<BsonDocument>(_collectionToUse);
 
-            using (var cursor = await collection.WatchAsync())
+            try
             {
-                Console.WriteLine("Watch started");
-                while (await cursor.MoveNextAsync() && !cursor.Current.Any())
+                using (var cursor = await collection.WatchAsync())
                 {
+                    // Read complete change to avoid reloading multiple times
+                    while (await cursor.MoveNextAsync() && !cursor.Current.Any())
+                    {
+                    }
+                    
+                    Load();
+                    _token.OnReload();
                 }
-                
-                Console.WriteLine("Change found, reloading");
-                Load();
-                _token.OnReload();
             }
+            catch (MongoCommandException)
+            {
+                Console.WriteLine("Change streams not available for configured MongoDb, disabling LiveReload.");   
+            }
+            
         }
 
         /// <summary>

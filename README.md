@@ -6,8 +6,10 @@
 
 1. Install the nuget package: 
 
+   Add GitLab source for this repo:
+
    ```c#
-   Install-Package MongoDb.Asp.ConfigurationProvider
+   Install-Package -Source "https://gitlab.com/api/v4/projects/27995356/packages/nuget/index.json" MongoDb.Asp.ConfigurationProvider
    ```
 
    
