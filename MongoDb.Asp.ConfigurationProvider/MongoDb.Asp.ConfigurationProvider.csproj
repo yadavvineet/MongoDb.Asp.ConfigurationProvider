@@ -18,7 +18,7 @@ Refer: https://github.com/yadavvineet/MongoDb.Asp.ConfigurationProvider for more
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.12.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>
